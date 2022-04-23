@@ -15,24 +15,24 @@ const cenerateFile = (api: IApi, fileName: string) =>
     const indexTemplate = readFileSync(templatePath, 'utf-8');
     api.writeTmpFile({
       path: indexPath,
-      content: api.utils.Mustache.render(indexTemplate, api.config.app),
+      content: api.utils.Mustache.render(indexTemplate, api.config.debug),
     });
   });
 
 export default function(api: IApi) {
   api.logger.info('use @asany/umi-plugin-sunmao');
 
-  const appTmpDir = join(api.paths.absTmpPath!, 'sunmao');
+  const pluginTmpDir = join(api.paths.absTmpPath!, 'sunmao');
 
   api.describe({
     key: 'sunmao',
     config: {
       default: {
-        // id: process.env.APPID,
+        debug: false,
       },
       schema(joi) {
         return joi.object({
-          id: joi.string(),
+          debug: joi.boolean,
         });
       },
     },
@@ -43,7 +43,7 @@ export default function(api: IApi) {
   files.map(fileName => cenerateFile(api, fileName));
 
   api.onGenerateFiles(() => {
-    const indexPath = 'app/autoImportLibrary.ts';
+    const indexPath = 'sunmao/autoImportLibrary.ts';
 
     const templatePath = joinTemplatePath('autoImportLibrary.hbs');
     const indexTemplate = readFileSync(templatePath, 'utf-8');
@@ -67,12 +67,12 @@ export default function(api: IApi) {
   });
 
   api.addRuntimePlugin({
-    fn: () => join(api.paths.absTmpPath!, 'app/runtime'),
+    fn: () => join(api.paths.absTmpPath!, 'sunmao/runtime'),
     stage: -1 * Number.MAX_SAFE_INTEGER + 1,
   });
 
   api.addUmiExports(() => ({
     exportAll: true,
-    source: api.utils.winPath(join(appTmpDir, 'exports')),
+    source: api.utils.winPath(join(pluginTmpDir, 'exports')),
   }));
 }
